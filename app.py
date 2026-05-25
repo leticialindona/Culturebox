@@ -4,10 +4,10 @@ import uuid
 import random
 from supabase import create_client
 
-# ─── CONFIG ───
+
 st.set_page_config(page_title="AfterShow", layout="wide")
 
-# ─── SESSION STATE ───
+
 for key in ["user", "pagina", "splash", "injetado", "wiki_result", "supabase_client", "amigo_id", "conversa_amigo"]:
     if key not in st.session_state:
         if key == "user":
@@ -27,7 +27,7 @@ for key in ["user", "pagina", "splash", "injetado", "wiki_result", "supabase_cli
         elif key == "conversa_amigo":
             st.session_state.conversa_amigo = None
 
-# ─── SUPABASE ───
+
 SUPABASE_URL = st.secrets.get("supabase_url", "https://ntxqfaqskorbxbaswdsl.supabase.co")
 SUPABASE_KEY = st.secrets.get("supabase_key", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50eHFmYXFza29yYnhiYXN3ZHNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjYyMjEsImV4cCI6MjA5NDg0MjIyMX0.sQjACD4u2hv_c7HkILvI5fshxkvvUNMKvlaony0ag2c")
 
@@ -35,7 +35,7 @@ if st.session_state.supabase_client is None:
     st.session_state.supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
 supabase = st.session_state.supabase_client
 
-# ─── STARFIELD ───
+
 random.seed(42)
 estrelas_html = ""
 for _ in range(60):
@@ -50,7 +50,6 @@ for _ in range(60):
         f"--d:{d}s;animation-delay:{delay}s;opacity:{op}\"></span>\n"
     )
 
-# ─── CSS ───
 CSS = f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
@@ -74,7 +73,6 @@ html, body, [class*="css"] {{
     background: transparent;
 }}
 
-/* ===== VIGNETTE / GLOW OVERLAY ===== */
 .stApp::before {{
     content: '';
     position: fixed;
@@ -87,7 +85,6 @@ html, body, [class*="css"] {{
     z-index: 0;
 }}
 
-/* ===== NOISE TEXTURE ===== */
 .stApp::after {{
     content: '';
     position: fixed;
@@ -100,7 +97,6 @@ html, body, [class*="css"] {{
     opacity: 0.4;
 }}
 
-/* ===== STARFIELD ===== */
 .starfield {{
     position: fixed;
     top: 0; left: 0;
@@ -121,7 +117,6 @@ html, body, [class*="css"] {{
     50% {{ opacity: 1; transform: scale(1.3); }}
 }}
 
-/* ===== SPLASH ===== */
 .splash-section {{
     min-height: 80vh;
     display: flex;
@@ -199,7 +194,6 @@ html, body, [class*="css"] {{
     box-shadow: 0 0 50px #C9A84C55 !important;
 }}
 
-/* ===== TYPOGRAPHY ===== */
 h1 {{
     font-family: 'Playfair Display', serif !important;
     color: #C9A84C !important;
@@ -223,7 +217,6 @@ p, li, .stMarkdown {{
     color: #FFF8E7 !important;
 }}
 
-/* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"] {{
     background: linear-gradient(180deg, #0d0a08 0%, #120e0a 100%);
     border-right: 1px solid #C9A84C22;
@@ -326,7 +319,6 @@ section[data-testid="stSidebar"] > div {{
     margin: 12px 16px;
 }}
 
-/* ===== TOP NAV ===== */
 .top-nav {{
     display: flex;
     flex-wrap: wrap;
@@ -390,7 +382,6 @@ section[data-testid="stSidebar"] > div {{
     opacity: 1 !important;
 }}
 
-/* ===== BUTTONS ===== */
 .stButton > button {{
     background: linear-gradient(135deg, #C9A84C, #a8872e) !important;
     color: #0d0a08 !important;
@@ -427,7 +418,6 @@ button.secondary:hover {{
     box-shadow: 0 4px 20px #C9A84C22 !important;
 }}
 
-/* ===== CARDS ===== */
 .card {{
     background: linear-gradient(145deg, #ffffff0a, #ffffff05);
     border: 1px solid #ffffff12;
@@ -444,7 +434,6 @@ button.secondary:hover {{
     transform: translateY(-2px);
 }}
 
-/* ===== LOGIN FORM ===== */
 .login-container {{
     max-width: 440px;
     margin: 60px auto;
@@ -497,14 +486,12 @@ button.secondary:hover {{
     color: #0d0a08;
 }}
 
-/* ===== DIVIDER ===== */
 .stDivider {{
     background: linear-gradient(90deg, transparent, #C9A84C44, transparent) !important;
     height: 1px !important;
     border: none !important;
 }}
 
-/* ===== FORM FIELDS ===== */
 .stTextInput input, .stTextArea textarea, .stSelectbox div, .stSlider {{
     background: #ffffff0a !important;
     border: 1px solid #ffffff15 !important;
@@ -517,7 +504,6 @@ button.secondary:hover {{
     box-shadow: 0 0 20px #C9A84C22, inset 0 0 0 1px #C9A84C22 !important;
 }}
 
-/* ===== RADIO ===== */
 .stRadio div[role="radiogroup"] {{
     gap: 4px !important;
 }}
@@ -525,7 +511,6 @@ button.secondary:hover {{
     color: #FFF8E7 !important;
 }}
 
-/* ===== LOADING ===== */
 .loading-spinner {{
     text-align: center;
     padding: 40px;
@@ -537,7 +522,6 @@ button.secondary:hover {{
     color: #C9A84C;
 }}
 
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {{
     width: 6px;
 }}
@@ -552,7 +536,6 @@ button.secondary:hover {{
     background: #C9A84C66;
 }}
 
-/* ===== ANIMATIONS ===== */
 .fade-in {{
     animation: fadeIn 0.6s ease-out forwards;
 }}
@@ -561,7 +544,7 @@ button.secondary:hover {{
     100% {{ opacity: 1; transform: translateY(0); }}
 }}
 
-/* ===== POSTER GLOW ===== */
+
 .poster-frame {{
     border-radius: 12px;
     overflow: hidden;
@@ -573,7 +556,6 @@ button.secondary:hover {{
     transform: translateY(-5px);
 }}
 
-/* ===== TAG / BADGE ===== */
 .tag {{
     display: inline-block;
     background: #C9A84C20;
@@ -589,7 +571,6 @@ button.secondary:hover {{
     border-color: #FFF8E722;
 }}
 
-/* ===== WIKI ===== */
 .wiki-card {{
     background: linear-gradient(145deg, #ffffff0a, #ffffff05);
     border: 1px solid #ffffff12;
@@ -608,7 +589,7 @@ button.secondary:hover {{
     box-shadow: 0 8px 30px #00000055;
 }}
 
-/* ===== MISC ===== */
+
 .mt-0 {{ margin-top: 0 !important; }}
 .mb-0 {{ margin-bottom: 0 !important; }}
 .text-center {{ text-align: center; }}
@@ -616,7 +597,6 @@ button.secondary:hover {{
 </style>
 """
 
-# ─── INJECT CSS + STARS ───
 if not st.session_state.injetado:
     st.markdown(CSS, unsafe_allow_html=True)
     st.markdown(
