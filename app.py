@@ -4,8 +4,8 @@ import uuid
 import random
 from supabase import create_client
 
-
-st.set_page_config(page_title="AfterShow", layout="wide")
+# ─── CONFIG ───
+st.set_page_config(page_title="AfterShow", layout="wide", initial_sidebar_state="collapsed")
 
 
 for key in ["user", "pagina", "splash", "injetado", "wiki_result", "supabase_client", "amigo_id", "conversa_amigo"]:
@@ -66,21 +66,42 @@ html, body, [class*="css"] {{
 }}
 
 .stApp {{
-    background: linear-gradient(170deg, #0d0a08 0%, #1a1510 30%, #0d0a08 100%);
+    background: linear-gradient(170deg, #0d0a08 0%, #1a1510 30%, #0d0a08 100%) !important;
+}}
+
+/* Force dark background on all Streamlit containers */
+[data-testid="stAppViewContainer"] {{
+    background: transparent !important;
+}}
+.main, .block-container, .st-emotion-cache-z5fcl4, .st-emotion-cache-1wmy9hl {{
+    background: transparent !important;
+}}
+section[data-testid="stAppViewContainer"] > div:first-child {{
+    background: transparent !important;
 }}
 
 [data-testid="stHeader"] {{
     background: transparent;
 }}
 
+/* keep content width consistent whether sidebar is open or closed */
+[data-testid="stAppViewContainer"] > .main {{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 3vw, 40px);
+    transition: none !important;
+}}
+
+/* ===== VIGNETTE / GLOW OVERLAY ===== */
 .stApp::before {{
     content: '';
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background:
-        radial-gradient(ellipse 80% 50% at 50% 0%, #C9A84C08 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 30% 70%, #C9A84C06 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 70% 30%, #C9A84C04 0%, transparent 50%);
+        radial-gradient(ellipse 100% 60% at 50% 0%, #C9A84C15 0%, transparent 70%),
+        radial-gradient(ellipse 70% 50% at 30% 80%, #C9A84C10 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 70% 20%, #C9A84C08 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, #C9A84C05 0%, transparent 40%);
     pointer-events: none;
     z-index: 0;
 }}
@@ -128,10 +149,17 @@ html, body, [class*="css"] {{
     margin: 20px 0;
     position: relative;
     z-index: 1;
+    box-shadow: inset 0 0 100px #C9A84C08, 0 0 60px #00000055;
 }}
 .splash-content {{
     text-align: center;
     animation: splashIn 1.2s ease-out forwards;
+    padding: 40px;
+    border: 1px solid #C9A84C22;
+    border-radius: 24px;
+    background: radial-gradient(ellipse at center, #1a1510cc, #0d0a08cc);
+    backdrop-filter: blur(20px);
+    max-width: 600px;
 }}
 @keyframes splashIn {{
     0% {{ opacity: 0; transform: scale(0.85) translateY(30px); }}
@@ -160,19 +188,12 @@ html, body, [class*="css"] {{
 .splash-subtitle {{
     font-family: 'Montserrat', sans-serif;
     font-size: clamp(14px, 2.5vw, 20px);
-    color: #FFF8E799;
+    color: #C9A84C;
     letter-spacing: 8px;
     text-transform: uppercase;
     margin-top: 15px;
     font-weight: 300;
 }}
-.splash-divider {{
-    width: 80px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #C9A84C, transparent);
-    margin: 25px auto;
-}}
-.splash-btn {{
     margin-top: 10px;
 }}
 .splash-btn button {{
@@ -199,22 +220,38 @@ h1 {{
     color: #C9A84C !important;
     font-size: 48px !important;
     letter-spacing: 1px;
-    margin-bottom: 8px !important;
+    margin-bottom: 20px !important;
     text-shadow: 0 0 30px #C9A84C22;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #C9A84C !important;
 }}
 h2 {{
     font-family: 'Playfair Display', serif !important;
     color: #F5E6C8 !important;
     font-size: 32px !important;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 20px #F5E6C811;
+    text-shadow: 0 0 20px #C9A84C33;
+    margin-bottom: 8px !important;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #C9A84C55 !important;
 }}
 h3 {{
+    font-family: 'Playfair Display', serif !important;
     color: #F5E6C8 !important;
     font-weight: 600 !important;
+    font-size: 20px !important;
+    letter-spacing: 0.3px;
+    margin-bottom: 14px !important;
 }}
 p, li, .stMarkdown {{
     color: #FFF8E7 !important;
+}}
+a, a:visited, a:hover, a:active {{
+    color: #C9A84C !important;
 }}
 
 section[data-testid="stSidebar"] {{
@@ -251,8 +288,8 @@ section[data-testid="stSidebar"] > div {{
     align-items: center;
     gap: 12px;
     padding: 15px 16px;
-    background: linear-gradient(135deg, #ffffff08, #C9A84C08);
-    border: 1px solid #ffffff11;
+    background: linear-gradient(135deg, #C9A84C08, #C9A84C15);
+    border: 1px solid #C9A84C33;
     border-radius: 12px;
     margin: 0 12px 15px;
     transition: all 0.3s;
@@ -270,7 +307,7 @@ section[data-testid="stSidebar"] > div {{
 .sidebar-user-info h4 {{
     font-size: 14px;
     margin: 0;
-    color: #FFF8E7;
+    color: #C9A84C;
 }}
 .sidebar-user-info p {{
     font-size: 11px;
@@ -284,7 +321,7 @@ section[data-testid="stSidebar"] > div {{
 .nav-section button {{
     background: transparent !important;
     border: none !important;
-    color: #FFF8E799 !important;
+    color: #C9A84C !important;
     text-align: left !important;
     padding: 10px 14px !important;
     border-radius: 8px !important;
@@ -312,76 +349,7 @@ section[data-testid="stSidebar"] > div {{
     border-left: 3px solid #C9A84C !important;
 }}
 
-.sidebar-divider {{
-    border: none;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #C9A84C44, transparent);
-    margin: 12px 16px;
-}}
-
-.top-nav {{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 12px 0 0;
-    margin-bottom: 28px;
-    position: relative;
-    z-index: 1;
-}}
-.top-nav::after {{
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #C9A84C44, transparent);
-}}
-.top-nav-btn {{
-    flex: 0 0 auto;
-    position: relative;
-}}
-.top-nav-btn button {{
-    background: transparent !important;
-    border: none !important;
-    color: #FFF8E766 !important;
-    border-radius: 0 !important;
-    padding: 8px 16px !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.3px !important;
-    transition: all 0.3s !important;
-    white-space: nowrap !important;
-    position: relative !important;
-}}
-.top-nav-btn button::after {{
-    content: '';
-    position: absolute;
-    bottom: 0; left: 50%; right: 50%;
-    height: 2px;
-    background: #C9A84C;
-    border-radius: 2px;
-    transition: all 0.3s ease;
-    opacity: 0;
-}}
-.top-nav-btn button:hover {{
-    color: #C9A84C !important;
-    background: transparent !important;
-    transform: none !important;
-}}
-.top-nav-btn button:hover::after {{
-    left: 20%; right: 20%;
-    opacity: 0.5;
-}}
-.top-nav-active button {{
-    color: #C9A84C !important;
-    font-weight: 600 !important;
-    background: transparent !important;
-}}
-.top-nav-active button::after {{
-    left: 10% !important;
-    right: 10% !important;
-    opacity: 1 !important;
-}}
-
+/* ===== BUTTONS ===== */
 .stButton > button {{
     background: linear-gradient(135deg, #C9A84C, #a8872e) !important;
     color: #0d0a08 !important;
@@ -418,34 +386,69 @@ button.secondary:hover {{
     box-shadow: 0 4px 20px #C9A84C22 !important;
 }}
 
+/* ===== PAGE CONTENT ===== */
+.page-content {{
+    position: relative;
+    z-index: 1;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #C9A84C08, transparent 80%);
+    border-radius: 20px;
+    padding: 32px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 60px #C9A84C22, inset 0 0 60px #C9A84C08;
+    margin-bottom: 20px;
+}}
 .card {{
-    background: linear-gradient(145deg, #ffffff0a, #ffffff05);
-    border: 1px solid #ffffff12;
+    background: linear-gradient(145deg, #1c1612, #0d0a08);
+    border: 1px solid #C9A84C33;
     border-radius: 16px;
     padding: 24px;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    transition: all 0.3s;
-    box-shadow: 0 4px 20px #00000033;
+    transition: all 0.4s;
+    box-shadow: 0 4px 20px #00000033, inset 0 1px 0 #C9A84C11;
+    position: relative;
+    overflow: hidden;
+}}
+.card::before {{
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #C9A84C55, transparent);
 }}
 .card:hover {{
-    border-color: #C9A84C33;
-    box-shadow: 0 8px 40px #00000066, 0 0 30px #C9A84C11;
-    transform: translateY(-2px);
+    border-color: #C9A84C55;
+    box-shadow: 0 8px 40px #00000066, 0 0 30px #C9A84C15, inset 0 1px 0 #C9A84C22;
+    transform: translateY(-3px);
 }}
 
-.login-container {{
+/* ===== DIVIDER ===== */
+.stDivider {{
+    height: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}}
     max-width: 440px;
-    margin: 60px auto;
+    margin: 80px auto;
     position: relative;
     z-index: 1;
 }}
 .login-card {{
-    background: linear-gradient(145deg, #1a1510, #0d0a08);
-    border: 1px solid #C9A84C22;
+    background: linear-gradient(145deg, #1c1612, #0d0a08);
+    border: 1px solid #C9A84C33;
     border-radius: 24px;
     padding: 40px 36px;
-    box-shadow: 0 20px 60px #00000066, 0 0 40px #C9A84C11;
+    box-shadow: 0 20px 60px #00000066, 0 0 40px #C9A84C15;
+    position: relative;
+    overflow: hidden;
+}}
+.login-card::before {{
+    content: '';
+    position: absolute;
+    top: 0; left: 25%; right: 25%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #C9A84C, transparent);
 }}
 .login-title {{
     text-align: center;
@@ -470,10 +473,7 @@ button.secondary:hover {{
     border: 1px solid #C9A84C22;
 }}
 .login-tab {{
-    flex: 1;
-    text-align: center;
-    padding: 10px 0;
-    font-size: 14px;
+    padding: 12px 24px;
     font-weight: 600;
     cursor: pointer;
     transition: 0.3s;
@@ -486,29 +486,61 @@ button.secondary:hover {{
     color: #0d0a08;
 }}
 
-.stDivider {{
-    background: linear-gradient(90deg, transparent, #C9A84C44, transparent) !important;
-    height: 1px !important;
-    border: none !important;
+/* ===== FORM FIELDS ===== */
+.stSelectbox label, .stTextInput label, .stTextArea label,
+[data-testid="stSelectbox"] p, [data-testid="stTextInput"] p, [data-testid="stTextArea"] p {{
+    color: #C9A84C !important;
+    font-weight: 600 !important;
 }}
-
 .stTextInput input, .stTextArea textarea, .stSelectbox div, .stSlider {{
-    background: #ffffff0a !important;
-    border: 1px solid #ffffff15 !important;
+    background: #0d0a08 !important;
+    border: 1px solid #C9A84C33 !important;
     border-radius: 8px !important;
-    color: #FFF8E7 !important;
+    color: #C9A84C !important;
     transition: all 0.3s !important;
+}}
+.stTextInput input::placeholder, .stTextArea textarea::placeholder {{
+    color: #C9A84C !important;
+    opacity: 1 !important;
 }}
 .stTextInput input:focus, .stTextArea textarea:focus {{
     border-color: #C9A84C66 !important;
     box-shadow: 0 0 20px #C9A84C22, inset 0 0 0 1px #C9A84C22 !important;
+}}
+.stSelectbox div:focus-within {{
+    border-color: #C9A84C66 !important;
+    box-shadow: 0 0 20px #C9A84C22 !important;
+}}
+.stSelectbox [data-baseweb="select"] > div {{
+    background: #0d0a08 !important;
+    border: 1px solid #C9A84C15 !important;
+}}
+/* force gold on ALL selectbox options (value + dropdown) */
+[data-testid="stSelectbox"] * {{
+    color: #C9A84C !important;
+}}
+[role="option"] {{
+    color: #C9A84C !important;
+}}
+.stSelectbox ul {{
+    background: #1a1510 !important;
+    border: 1px solid #C9A84C33 !important;
+}}
+.stSelectbox li,
+.stSelectbox [role="option"],
+.stSelectbox [data-baseweb="menu-item"] {{
+    color: #C9A84C !important;
+}}
+.stSelectbox li:hover,
+.stSelectbox [role="option"]:hover {{
+    background: #C9A84C20 !important;
 }}
 
 .stRadio div[role="radiogroup"] {{
     gap: 4px !important;
 }}
 .stRadio label {{
-    color: #FFF8E7 !important;
+    color: #C9A84C !important;
 }}
 
 .loading-spinner {{
@@ -566,14 +598,14 @@ button.secondary:hover {{
     border: 1px solid #C9A84C33;
 }}
 .tag-streaming {{
-    background: #FFF8E710;
-    color: #FFF8E7;
-    border-color: #FFF8E722;
+    background: #C9A84C15;
+    color: #C9A84C;
+    border-color: #C9A84C33;
 }}
 
 .wiki-card {{
-    background: linear-gradient(145deg, #ffffff0a, #ffffff05);
-    border: 1px solid #ffffff12;
+    background: linear-gradient(145deg, #1a1510, #0d0a08);
+    border: 1px solid #C9A84C33;
     border-radius: 16px;
     padding: 24px;
     margin: 16px 0;
@@ -597,8 +629,9 @@ button.secondary:hover {{
 </style>
 """
 
+# ─── INJECT CSS + STARS ───
+st.markdown(CSS, unsafe_allow_html=True)
 if not st.session_state.injetado:
-    st.markdown(CSS, unsafe_allow_html=True)
     st.markdown(
         f'<div class="starfield">{estrelas_html}</div>',
         unsafe_allow_html=True,
@@ -701,7 +734,6 @@ def render_splash():
         <div style="text-align:center; animation: splashIn 1.2s ease-out forwards;">
             <span class="splash-star">✦</span>
             <div class="splash-title">AfterShow</div>
-            <div class="splash-divider"></div>
             <div class="splash-subtitle">O seu mundo cultural</div>
         </div>
     </div>
@@ -788,8 +820,6 @@ def render_sidebar():
             </div>
             """, unsafe_allow_html=True)
 
-        st.markdown('<hr class="sidebar-divider">', unsafe_allow_html=True)
-
         st.markdown('<div class="nav-section">', unsafe_allow_html=True)
         if st.button("Sair", key="nav_sair"):
             try:
@@ -804,22 +834,25 @@ def render_sidebar():
 
 def render_top_nav():
     pages = [
-        "Inicio", "Meu Perfil", "Filmes", "Teatro",
-        "Musicais", "Favoritos", "Pastas", "Amigos", "Conversas",
+        ("Inicio", "Inicio"),
+        ("Perfil", "Meu Perfil"),
+        ("Filmes", "Filmes"),
+        ("Teatro", "Teatro"),
+        ("Musicais", "Musicais"),
+        ("Favoritos", "Favoritos"),
+        ("Pastas", "Pastas"),
+        ("Amigos", "Amigos"),
+        ("Chat", "Conversas"),
     ]
+
     cols = st.columns(len(pages), gap="small")
-    for i, name in enumerate(pages):
-        active = st.session_state.pagina == name
+    for i, (display, page) in enumerate(pages):
         with cols[i]:
-            cls = "top-nav-active" if active else ""
-            st.markdown(f'<div class="top-nav-btn {cls}">', unsafe_allow_html=True)
-            if st.button(name, key=f"tnav_{name}", use_container_width=True):
-                # Reset sub-pages when navigating
+            if st.button(display, key=f"tnav_{page}", use_container_width=False):
                 st.session_state.amigo_id = None
                 st.session_state.conversa_amigo = None
-                st.session_state.pagina = name
+                st.session_state.pagina = page
                 st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_home():
@@ -1046,6 +1079,70 @@ def render_movies():
                 else:
                     st.error("Filme não encontrado. Tente outro nome.")
 
+            elif tipo_busca in ("Ator", "Diretor"):
+                url_pessoa = (
+                    f"https://api.themoviedb.org/3/search/person"
+                    f"?api_key={api_key}&query={pesquisa}&language=pt-BR"
+                )
+                resp_pessoa = requests.get(url_pessoa)
+                dados_pessoa = resp_pessoa.json()
+
+                if dados_pessoa.get("results"):
+                    pessoa = dados_pessoa["results"][0]
+                    nome = pessoa["name"]
+                    foto = pessoa.get("profile_path", "")
+
+                    bio_url = (
+                        f"https://api.themoviedb.org/3/person/{pessoa['id']}"
+                        f"?api_key={api_key}&language=pt-BR"
+                    )
+                    bio_dados = requests.get(bio_url).json()
+                    biografia = bio_dados.get("biography", "")
+
+                    foto_url = f"https://image.tmdb.org/t/p/w500{foto}" if foto else ""
+
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        if foto_url:
+                            st.markdown(
+                                f'<div class="poster-frame">'
+                                f'<img src="{foto_url}" style="width:100%;display:block;">'
+                                f'</div>', unsafe_allow_html=True,
+                            )
+                        else:
+                            st.markdown("""
+                            <div class="poster-frame" style="aspect-ratio:2/3;display:flex;
+                                align-items:center;justify-content:center;
+                                background:linear-gradient(135deg,#1a1510,#0d0a08);
+                                color:#C9A84C44;font-size:14px;">Sem foto</div>
+                            """, unsafe_allow_html=True)
+
+                    with col2:
+                        st.markdown(f"<h2 style='margin-top:0!important;'>{nome}</h2>", unsafe_allow_html=True)
+                        if biografia:
+                            texto_bio = biografia[:600] + ("..." if len(biografia) > 600 else "")
+                            st.markdown(f'<p style="line-height:1.7;font-size:14px;">{texto_bio}</p>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<p style="color:#C9A84C;">Biografia não disponível.</p>', unsafe_allow_html=True)
+
+                        st.divider()
+                        st.markdown("**Conhecido por**")
+                        for trabalho in pessoa.get("known_for", [])[:8]:
+                            titulo = trabalho.get("title") or trabalho.get("name", "")
+                            ano = ""
+                            if trabalho.get("release_date"):
+                                ano = f" ({trabalho['release_date'][:4]})"
+                            elif trabalho.get("first_air_date"):
+                                ano = f" ({trabalho['first_air_date'][:4]})"
+                            midia = trabalho.get("media_type", "").title()
+                            st.markdown(
+                                f'<span style="font-size:14px;">• {titulo}{ano} '
+                                f'<span style="color:#C9A84C;font-size:12px;">[{midia}]</span></span>',
+                                unsafe_allow_html=True,
+                            )
+                else:
+                    st.error(f"{tipo_busca} não encontrado. Tente outro nome.")
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -1139,7 +1236,7 @@ def render_theater():
                                 {img_html}
                                 <div style="padding:12px 16px;">
                                     <span class="tag">{cat_tag}</span>
-                                    <p style="margin:8px 0 4px;font-weight:600;font-size:14px;color:#FFF8E7;line-height:1.3;">{ev['titulo']}</p>
+                                    <p style="margin:8px 0 4px;font-weight:600;font-size:14px;color:#C9A84C;line-height:1.3;">{ev['titulo']}</p>
                                     <p style="font-size:12px;color:#C9A84C;margin:0 0 6px;">{ev['data']}</p>
                                     <a href="{ev['link']}" target="_blank" style="color:#C9A84C;font-size:13px;">Ver detalhes →</a>
                                 </div>
@@ -1534,7 +1631,7 @@ def render_friends():
                         inicial = perfil.get("username", "?")[0].upper()
                         st.markdown(f"""
                         <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;
-                            border-bottom:1px solid #ffffff08;transition:all 0.25s;cursor:pointer;">
+                            border-bottom:1px solid #C9A84C22;transition:all 0.25s;cursor:pointer;">
                             <div style="width:38px;height:38px;border-radius:50%;
                                 background:linear-gradient(135deg,#C9A84C,#a8872e);
                                 display:flex;align-items:center;justify-content:center;
@@ -1542,7 +1639,7 @@ def render_friends():
                                 {inicial}
                             </div>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:14px;font-weight:600;color:#FFF8E7;">
+                                <div style="font-size:14px;font-weight:600;color:#C9A84C;">
                                     @{perfil['username']}
                                 </div>
                                 <div style="font-size:12px;color:#C9A84C;margin-top:2px;
@@ -1571,8 +1668,8 @@ def render_friends():
 
     with col_busca:
         st.markdown("""
-        <div style="background:linear-gradient(145deg,#ffffff08,#ffffff03);
-            border:1px solid #ffffff12;border-radius:16px;padding:20px 18px;
+        <div style="background:linear-gradient(145deg,#1a1510,#0d0a08);
+            border:1px solid #C9A84C33;border-radius:16px;padding:20px 18px;
             backdrop-filter:blur(12px);margin-bottom:16px;">
             <h4 style="margin:0 0 12px;color:#C9A84C;font-size:14px;font-weight:600;
                 letter-spacing:0.5px;">ADICIONAR AMIGOS</h4>
@@ -1594,7 +1691,7 @@ def render_friends():
                         inicial = usuario["username"][0].upper()
                         st.markdown(f"""
                         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;
-                            border-bottom:1px solid #ffffff08;">
+                            border-bottom:1px solid #C9A84C22;">
                             <div style="width:32px;height:32px;border-radius:50%;
                                 background:linear-gradient(135deg,#C9A84C,#a8872e);
                                 display:flex;align-items:center;justify-content:center;
@@ -1602,7 +1699,7 @@ def render_friends():
                                 {inicial}
                             </div>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:13px;font-weight:500;color:#FFF8E7;">
+                                <div style="font-size:13px;font-weight:500;color:#C9A84C;">
                                     @{usuario['username']}
                                 </div>
                             </div>
@@ -1818,7 +1915,7 @@ def render_conversas():
                 for m in msgs.data:
                     sou_eu = m["remetente_id"] == st.session_state.user.id
                     lado = "right" if sou_eu else "left"
-                    cor = "#C9A84C" if sou_eu else "#ffffff15"
+                    cor = "#C9A84C" if sou_eu else "#C9A84C15"
                     texto_cor = "#0d0a08" if sou_eu else "#C9A84C"
                     is_critica = m["conteudo"].startswith("CRITICA:")
                     critica_style = "border-left:3px solid #C9A84C;" if is_critica else ""
@@ -1930,7 +2027,7 @@ def render_conversas():
                         inicial = amigo["username"][0].upper()
                         st.markdown(f"""
                         <div style="display:flex;align-items:center;gap:12px;
-                            background:#ffffff08;border:1px solid #ffffff15;
+                            background:#1a1510;border:1px solid #C9A84C33;
                             border-radius:12px;padding:12px 16px;margin-bottom:8px;">
                             <div style="width:40px;height:40px;border-radius:50%;
                                 background:linear-gradient(135deg,#C9A84C,#a8872e);
@@ -1939,7 +2036,7 @@ def render_conversas():
                                 {inicial}
                             </div>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:15px;font-weight:600;color:#FFF8E7;">
+                                <div style="font-size:15px;font-weight:600;color:#C9A84C;">
                                     @{amigo['username']}
                                 </div>
                                 <div style="font-size:13px;color:#C9A84C;overflow:hidden;
@@ -1947,7 +2044,7 @@ def render_conversas():
                                     {preview}
                                 </div>
                             </div>
-                            {f'<span style="font-size:10px;color:#ffffff55;">msg</span>' if tem_msg else ''}
+                            {f'<span style="font-size:10px;color:#C9A84C55;">msg</span>' if tem_msg else ''}
                         </div>
                         """, unsafe_allow_html=True)
                         if st.button("Conversar", key=f"chat_{aid}", use_container_width=True):
@@ -1994,7 +2091,7 @@ else:
         page = st.session_state.pagina
         if page in pages_map:
             st.markdown(
-                '<div style="padding: 0 clamp(16px, 3vw, 40px); position: relative; z-index: 1;">',
+                '<div class="page-content">',
                 unsafe_allow_html=True,
             )
             pages_map[page]()
