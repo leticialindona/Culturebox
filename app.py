@@ -605,9 +605,6 @@ if not st.session_state.injetado:
     )
     st.session_state.injetado = True
 
-# ──────────────────────────────────────────────
-# FUNÇÕES DE AUTENTICAÇÃO
-# ──────────────────────────────────────────────
 
 def login(email, password):
     try:
@@ -636,9 +633,6 @@ def signup(email, password, bio):
         st.error(str(e))
         return False
 
-# ──────────────────────────────────────────────
-# FUNÇÕES DE API
-# ──────────────────────────────────────────────
 
 def search_wikipedia(query, categoria="", lang="pt"):
     import urllib.parse
@@ -700,10 +694,6 @@ def search_wikipedia(query, categoria="", lang="pt"):
         pass
     return None
 
-# ──────────────────────────────────────────────
-# TELA DE SPLASH
-# ──────────────────────────────────────────────
-
 def render_splash():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
     st.markdown("""
@@ -726,9 +716,6 @@ def render_splash():
         st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# LOGIN / CADASTRO
-# ──────────────────────────────────────────────
 
 def render_login_page():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -765,9 +752,6 @@ def render_login_page():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# SIDEBAR
-# ──────────────────────────────────────────────
 
 def render_sidebar():
     dados_perfil = None
@@ -818,10 +802,6 @@ def render_sidebar():
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# TOP NAV
-# ──────────────────────────────────────────────
-
 def render_top_nav():
     pages = [
         "Inicio", "Meu Perfil", "Filmes", "Teatro",
@@ -841,9 +821,6 @@ def render_top_nav():
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: INÍCIO
-# ──────────────────────────────────────────────
 
 def render_home():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -899,9 +876,6 @@ def render_home():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: FILMES
-# ──────────────────────────────────────────────
 
 def render_movies():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1074,9 +1048,6 @@ def render_movies():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: TEATRO (Em Cartaz + Wikipedia)
-# ──────────────────────────────────────────────
 
 @st.cache_data(ttl=3600)
 def fetch_em_cartaz():
@@ -1114,8 +1085,6 @@ def render_theater():
         Descubra espetáculos em cartaz no Theatro Municipal de São Paulo ou pesquise qualquer peça na Wikipedia.
     </p>
     """, unsafe_allow_html=True)
-
-    # ── EM CARTAZ ──
     st.divider()
     st.markdown("### Em Cartaz")
 
@@ -1177,7 +1146,7 @@ def render_theater():
                             </div>
                             """, unsafe_allow_html=True)
 
-    # ── PESQUISAR NA WIKIPEDIA ──
+
     st.divider()
     st.markdown("### Pesquisar peça")
 
@@ -1231,9 +1200,6 @@ def render_theater():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: MUSICAIS (Wikipedia API)
-# ──────────────────────────────────────────────
 
 def render_musicals():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1350,10 +1316,6 @@ def render_musicals():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: MEU PERFIL
-# ──────────────────────────────────────────────
-
 def render_profile():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
     st.header("Meu Perfil")
@@ -1455,10 +1417,6 @@ def render_profile():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: FAVORITOS
-# ──────────────────────────────────────────────
-
 def render_favorites():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
     st.header("Meus Favoritos")
@@ -1492,9 +1450,6 @@ def render_favorites():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: PASTAS
-# ──────────────────────────────────────────────
 
 def render_folders():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1555,9 +1510,6 @@ def render_folders():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: AMIGOS
-# ──────────────────────────────────────────────
 
 def render_friends():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1678,9 +1630,6 @@ def render_friends():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: PERFIL DO AMIGO
-# ──────────────────────────────────────────────
 
 def render_friend_profile():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1829,9 +1778,6 @@ def render_friend_profile():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────
-# PÁGINA: CONVERSAS
-# ──────────────────────────────────────────────
 
 def render_conversas():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1862,7 +1808,6 @@ def render_conversas():
 
         st.divider()
 
-        # ── MENSAGENS ──
         try:
             msgs = supabase.table("mensagens").select("*").or_(
                 f"and(remetente_id.eq.{st.session_state.user.id},destinatario_id.eq.{amigo_chat}),"
@@ -1893,7 +1838,7 @@ def render_conversas():
         except Exception as e:
             st.error(e)
 
-        # ── ENVIAR MENSAGEM ──
+    
         st.divider()
         with st.form("envio_msg", clear_on_submit=True):
             texto = st.text_input("", placeholder="Digite sua mensagem...", label_visibility="collapsed")
@@ -1909,7 +1854,6 @@ def render_conversas():
                     except Exception as e:
                         st.error(e)
 
-        # ── ENVIAR CRITICA ──
         st.divider()
         st.markdown("### Compartilhar Critica")
         try:
@@ -1954,7 +1898,7 @@ def render_conversas():
             st.error(e)
 
     else:
-        # ── LISTA DE CONVERSAS ──
+        
         st.header("Conversas")
         try:
             amizades = supabase.table("amigos").select("*").eq(
