@@ -905,7 +905,7 @@ def render_movies():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
     st.header("Filmes")
 
-    tipo_busca = st.selectbox("Buscar por:", ["Filme", "Ator", "Diretor"])
+    tipo_busca = st.radio("Buscar por:", ["Filme", "Ator", "Diretor"], horizontal=True)
     api_key = st.secrets.get("tmdb_api_key", "ca20f980dcf5f16b3082b78b4bd754cc")
     pesquisa = st.text_input("Digite sua pesquisa:", placeholder="Ex: O Poderoso Chefão, Hamilton, ...")
 
