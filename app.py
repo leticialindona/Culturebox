@@ -1137,13 +1137,12 @@ def render_movies():
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-@st.cache_data(ttl=300)
 def fetch_em_cartaz():
     url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
     try:
         resp = requests.get(url, timeout=10)
         if resp.status_code != 200:
-            return None
+            return []
         eventos = resp.json()
         resultados = []
         for e in eventos:
@@ -1161,8 +1160,9 @@ def fetch_em_cartaz():
                 "imagem": img_url,
             })
         return resultados
-    except:
-        return "ERRO"
+    except Exception as e:
+        st.error(f"Erro na API: {e}")
+        return []
 
 def render_theater():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1191,9 +1191,7 @@ def render_theater():
     with st.spinner("Carregando programação..."):
         eventos = fetch_em_cartaz()
 
-    if eventos is None or eventos == "ERRO":
-        if eventos == "ERRO":
-            st.error("Erro de conexão com a API do Theatro Municipal.")
+    if not eventos:
         st.markdown("""
         <div class="card text-center" style="padding:30px;">
             <p style="color:#C9A84C;">Não foi possível carregar a programação no momento.</p>
