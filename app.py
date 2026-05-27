@@ -1139,7 +1139,10 @@ def render_movies():
 
 def fetch_em_cartaz():
     url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
-    headers = {"User-Agent": "AfterShow/1.0"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+    }
     try:
         resp = requests.get(url, headers=headers, timeout=15)
         return resp
