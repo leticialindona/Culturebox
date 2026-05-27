@@ -1138,19 +1138,29 @@ def render_movies():
 
 
 def fetch_em_cartaz():
-    url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?per_page=50"
-    sess = requests.Session()
-    sess.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-        "Referer": "https://theatromunicipal.org.br/",
-        "Origin": "https://theatromunicipal.org.br",
-        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Accept": "*/*",
-    })
+    import json as _json
+
+    url_api = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
+    url_proxy = "https://r.jina.ai/http://" + url_api.replace("https://", "")
+
     try:
-        resp = sess.get(url, timeout=20)
+        resp = requests.get(url_proxy, timeout=30)
         resp.raise_for_status()
-        eventos = resp.json()
+        text = resp.text
+        start = text.find("[")
+        end = text.rfind("]") + 1
+        if start < 0 or end <= 1:
+            raise ValueError("JSON array not found in proxy response")
+        eventos = _json.loads(text[start:end], strict=False)
+    except Exception:
+        try:
+            resp = requests.get(url_api, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            }, timeout=15)
+            resp.raise_for_status()
+            eventos = resp.json()
+        except Exception as e2:
+            return ("erro", f"{type(e2).__name__}")
         resultados = []
         for e in eventos:
             cats = [c for c in e.get("class_list", []) if c.startswith("categorias-eventos-")]
@@ -1202,17 +1212,10 @@ def render_theater():
     if status == "ok":
         eventos = dados
     else:
-        if status == "http":
-            st.error(f"API retornou status {dados}")
-        elif status == "url":
-            st.error(f"Erro de conexão: {dados}")
-        elif status == "erro":
-            st.error(dados)
-        else:
-            st.error(f"Erro desconhecido: {status} / {dados}")
+        st.warning("Programação temporariamente indisponível.")
         st.markdown("""
         <div class="card text-center" style="padding:30px;">
-            <p style="color:#C9A84C;">Não foi possível carregar a programação no momento.</p>
+            <p style="color:#C9A84C;">Não foi possível carregar a programação no momento. Tente novamente mais tarde.</p>
         </div>
         """, unsafe_allow_html=True)
         return
