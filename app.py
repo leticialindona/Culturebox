@@ -429,11 +429,6 @@ button.secondary:hover {{
     border: none !important;
     background: transparent !important;
 }}
-    max-width: 440px;
-    margin: 80px auto;
-    position: relative;
-    z-index: 1;
-}}
 .login-card {{
     background: linear-gradient(145deg, #1c1612, #0d0a08);
     border: 1px solid #C9A84C33;
