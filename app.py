@@ -1138,15 +1138,19 @@ def render_movies():
 
 
 def fetch_em_cartaz():
-    import urllib.request, json
-    url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
-    req = urllib.request.Request(url, headers={
+    url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?per_page=50"
+    sess = requests.Session()
+    sess.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "Referer": "https://theatromunicipal.org.br/",
+        "Origin": "https://theatromunicipal.org.br",
+        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
         "Accept": "*/*",
     })
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            eventos = json.loads(resp.read())
+        resp = sess.get(url, timeout=20)
+        resp.raise_for_status()
+        eventos = resp.json()
         resultados = []
         for e in eventos:
             cats = [c for c in e.get("class_list", []) if c.startswith("categorias-eventos-")]
@@ -1163,11 +1167,8 @@ def fetch_em_cartaz():
                 "imagem": img_url,
             })
         return ("ok", resultados)
-    except urllib.error.HTTPError as e:
-        return ("http", f"{e.code}")
-    except urllib.error.URLError as e:
-        code = getattr(e, 'code', None) or getattr(e.reason, 'errno', '') or str(e.reason)
-        return ("url", f"{code}")
+    except requests.exceptions.HTTPError as e:
+        return ("http", f"{e.response.status_code}")
     except Exception as e:
         return ("erro", f"{type(e).__name__}: {e}")
 
