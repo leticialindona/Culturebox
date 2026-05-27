@@ -1142,28 +1142,9 @@ def fetch_em_cartaz():
     headers = {"User-Agent": "AfterShow/1.0"}
     try:
         resp = requests.get(url, headers=headers, timeout=15)
-        if resp.status_code != 200:
-            return []
-        eventos = resp.json()
-        resultados = []
-        for e in eventos:
-            cats = [c for c in e.get("class_list", []) if c.startswith("categorias-eventos-")]
-            img_url = ""
-            if "_embedded" in e and "wp:featuredmedia" in e["_embedded"]:
-                media = e["_embedded"]["wp:featuredmedia"][0]
-                sizes = media.get("media_details", {}).get("sizes", {})
-                img_url = sizes.get("medium", sizes.get("full", {})).get("source_url", "")
-            resultados.append({
-                "titulo": e["title"]["rendered"],
-                "data": e["date"][:10],
-                "link": e["link"],
-                "categorias": [c.replace("categorias-eventos-", "").replace("-", " ") for c in cats],
-                "imagem": img_url,
-            })
-        return resultados
+        return resp
     except Exception as e:
-        st.error(f"Erro ao acessar API do Teatro: {type(e).__name__}")
-        return []
+        return None
 
 def render_theater():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1190,15 +1171,19 @@ def render_theater():
     filtro = st.radio("Filtrar por categoria", list(cat_map.keys()), horizontal=True, label_visibility="collapsed")
 
     with st.spinner("Carregando programação..."):
-        eventos = fetch_em_cartaz()
+        resp = fetch_em_cartaz()
 
-    if not eventos:
+    if resp is None:
+        st.error("Erro de conexão com o Theatro Municipal.")
         st.markdown("""
         <div class="card text-center" style="padding:30px;">
             <p style="color:#C9A84C;">Não foi possível carregar a programação no momento.</p>
         </div>
         """, unsafe_allow_html=True)
+    elif resp.status_code != 200:
+        st.error(f"API retornou status {resp.status_code}")
     else:
+        eventos = resp.json()
         slug = cat_map[filtro]
         eventos_filtrados = [e for e in eventos if slug is None or slug in e["categorias"]]
 
