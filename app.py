@@ -498,6 +498,11 @@ button.secondary:hover {{
     color: #C9A84C !important;
     opacity: 1 !important;
 }}
+.stTextInput input:disabled, .stTextArea textarea:disabled {{
+    color: #C9A84C !important;
+    opacity: 0.8 !important;
+    -webkit-text-fill-color: #C9A84C !important;
+}}
 .stTextInput input:focus, .stTextArea textarea:focus {{
     border-color: #C9A84C66 !important;
     box-shadow: 0 0 20px #C9A84C22, inset 0 0 0 1px #C9A84C22 !important;
