@@ -905,7 +905,7 @@ def render_movies():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
     st.header("Filmes")
 
-    tipo_busca = st.radio("Buscar por:", ["Filme", "Ator", "Diretor"], horizontal=True)
+    tipo_busca = st.selectbox("Buscar por:", ["Filme", "Ator", "Diretor"])
     api_key = st.secrets.get("tmdb_api_key", "ca20f980dcf5f16b3082b78b4bd754cc")
     pesquisa = st.text_input("Digite sua pesquisa:", placeholder="Ex: O Poderoso Chefão, Hamilton, ...")
 
@@ -1137,7 +1137,7 @@ def render_movies():
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=300)
 def fetch_em_cartaz():
     url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
     try:
@@ -1162,7 +1162,7 @@ def fetch_em_cartaz():
             })
         return resultados
     except:
-        return None
+        return "ERRO"
 
 def render_theater():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1186,12 +1186,14 @@ def render_theater():
         "Concertos": "concertos",
     }
 
-    filtro = st.radio("Filtrar por categoria", list(cat_map.keys()), horizontal=True, label_visibility="collapsed")
+    filtro = st.selectbox("Filtrar por categoria", list(cat_map.keys()), label_visibility="collapsed")
 
     with st.spinner("Carregando programação..."):
         eventos = fetch_em_cartaz()
 
-    if eventos is None:
+    if eventos is None or eventos == "ERRO":
+        if eventos == "ERRO":
+            st.error("Erro de conexão com a API do Theatro Municipal.")
         st.markdown("""
         <div class="card text-center" style="padding:30px;">
             <p style="color:#C9A84C;">Não foi possível carregar a programação no momento.</p>
