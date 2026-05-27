@@ -1186,7 +1186,7 @@ def render_theater():
         "Concertos": "concertos",
     }
 
-    filtro = st.selectbox("Filtrar por categoria", list(cat_map.keys()), label_visibility="collapsed")
+    filtro = st.radio("Filtrar por categoria", list(cat_map.keys()), horizontal=True, label_visibility="collapsed")
 
     with st.spinner("Carregando programação..."):
         eventos = fetch_em_cartaz()
