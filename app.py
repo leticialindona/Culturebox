@@ -1139,48 +1139,46 @@ def render_movies():
 
 def fetch_em_cartaz():
     import json as _json
+    from urllib.parse import quote as _quote
 
     url_api = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
-    url_proxy = "https://r.jina.ai/http://" + url_api.replace("https://", "")
+    url_proxy = "https://r.jina.ai/" + _quote("http://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50", safe="")
 
     try:
         resp = requests.get(url_proxy, timeout=30)
         resp.raise_for_status()
         text = resp.text
         start = text.find("[")
+        if start < 0:
+            raise ValueError("JSON not found")
         end = text.rfind("]") + 1
-        if start < 0 or end <= 1:
-            raise ValueError("JSON array not found in proxy response")
         eventos = _json.loads(text[start:end], strict=False)
     except Exception:
         try:
             resp = requests.get(url_api, headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             }, timeout=15)
             resp.raise_for_status()
             eventos = resp.json()
         except Exception as e2:
-            return ("erro", f"{type(e2).__name__}")
-        resultados = []
-        for e in eventos:
-            cats = [c for c in e.get("class_list", []) if c.startswith("categorias-eventos-")]
-            img_url = ""
-            if "_embedded" in e and "wp:featuredmedia" in e["_embedded"]:
-                media = e["_embedded"]["wp:featuredmedia"][0]
-                sizes = media.get("media_details", {}).get("sizes", {})
-                img_url = sizes.get("medium", sizes.get("full", {})).get("source_url", "")
-            resultados.append({
-                "titulo": e["title"]["rendered"],
-                "data": e["date"][:10],
-                "link": e["link"],
-                "categorias": [c.replace("categorias-eventos-", "").replace("-", " ") for c in cats],
-                "imagem": img_url,
-            })
-        return ("ok", resultados)
-    except requests.exceptions.HTTPError as e:
-        return ("http", f"{e.response.status_code}")
-    except Exception as e:
-        return ("erro", f"{type(e).__name__}: {e}")
+            return ("erro", type(e2).__name__)
+
+    resultados = []
+    for e in (eventos or []):
+        cats = [c for c in e.get("class_list", []) if c.startswith("categorias-eventos-")]
+        img_url = ""
+        if "_embedded" in e and "wp:featuredmedia" in e["_embedded"]:
+            media = e["_embedded"]["wp:featuredmedia"][0]
+            sizes = media.get("media_details", {}).get("sizes", {})
+            img_url = sizes.get("medium", sizes.get("full", {})).get("source_url", "")
+        resultados.append({
+            "titulo": e["title"]["rendered"],
+            "data": e["date"][:10],
+            "link": e["link"],
+            "categorias": [c.replace("categorias-eventos-", "").replace("-", " ") for c in cats],
+            "imagem": img_url,
+        })
+    return ("ok", resultados)
 
 def render_theater():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
