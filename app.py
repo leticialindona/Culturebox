@@ -1160,8 +1160,7 @@ def fetch_em_cartaz():
                 "imagem": img_url,
             })
         return resultados
-    except Exception as e:
-        st.error(f"Erro na API: {e}")
+    except:
         return []
 
 def render_theater():
