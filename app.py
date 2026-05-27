@@ -1479,7 +1479,7 @@ def render_profile():
             email_user = st.session_state.user.email or ""
             st.markdown(f"<p style='color:#C9A84C;font-size:13px;margin-bottom:4px;'>Email</p>", unsafe_allow_html=True)
             st.markdown(f"<p style='color:#fff;font-size:15px;margin-top:0;'>{email_user}</p>", unsafe_allow_html=True)
-            nova_senha = st.text_input("Nova senha", type="password", placeholder="Digite a nova senha")
+            nova_senha = st.text_input("Senha", type="password", placeholder="Digite a nova senha")
             if st.button("Alterar Senha", key="alt_senha") and nova_senha:
                 try:
                     supabase.auth.update_user({"password": nova_senha})
