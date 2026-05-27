@@ -1139,8 +1139,9 @@ def render_movies():
 
 def fetch_em_cartaz():
     url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
+    headers = {"User-Agent": "AfterShow/1.0"}
     try:
-        resp = requests.get(url, timeout=10)
+        resp = requests.get(url, headers=headers, timeout=15)
         if resp.status_code != 200:
             return []
         eventos = resp.json()
@@ -1160,7 +1161,8 @@ def fetch_em_cartaz():
                 "imagem": img_url,
             })
         return resultados
-    except:
+    except Exception as e:
+        st.error(f"Erro ao acessar API do Teatro: {type(e).__name__}")
         return []
 
 def render_theater():
