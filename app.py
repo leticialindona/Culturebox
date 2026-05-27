@@ -907,7 +907,7 @@ def render_movies():
 
     tipo_busca = st.selectbox("Buscar por:", ["Filme", "Ator", "Diretor"])
     api_key = st.secrets.get("tmdb_api_key", "ca20f980dcf5f16b3082b78b4bd754cc")
-    pesquisa = st.text_input("Digite sua pesquisa:", placeholder="Ex: O Poderoso Chefão, Hamilton, ...")
+    pesquisa = st.text_input("Digite sua pesquisa:", placeholder="Ex: O Poderoso Chefão, Hamilton, ...", autocomplete="off")
 
     if pesquisa:
         with st.spinner("Buscando..."):
@@ -1238,7 +1238,7 @@ def render_theater():
     st.divider()
     st.markdown("### Pesquisar peça")
 
-    pesquisa = st.text_input("Pesquise uma peça de teatro:", placeholder="Ex: Hamlet, O Auto da Compadecida, ...")
+    pesquisa = st.text_input("Pesquise uma peça de teatro:", placeholder="Ex: Hamlet, O Auto da Compadecida, ...", autocomplete="off")
     st.markdown('<p style="color:#C9A84C;font-size:13px;">Os resultados são obtidos via Wikipedia.</p>', unsafe_allow_html=True)
 
     if pesquisa:
