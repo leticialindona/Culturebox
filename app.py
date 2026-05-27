@@ -515,10 +515,6 @@ button.secondary:hover {{
     background: #0d0a08 !important;
     border: 1px solid #C9A84C15 !important;
 }}
-/* force gold on ALL selectbox options (value + dropdown) */
-[data-testid="stSelectbox"] * {{
-    color: #C9A84C !important;
-}}
 [role="option"] {{
     color: #C9A84C !important;
 }}
@@ -914,7 +910,7 @@ def render_movies():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
     st.header("Filmes")
 
-    tipo_busca = st.selectbox("Buscar por:", ["Filme", "Ator", "Diretor"])
+    tipo_busca = st.radio("Buscar por:", ["Filme", "Ator", "Diretor"], horizontal=True)
     api_key = st.secrets.get("tmdb_api_key", "ca20f980dcf5f16b3082b78b4bd754cc")
     pesquisa = st.text_input("Digite sua pesquisa:", placeholder="Ex: O Poderoso Chefão, Hamilton, ...")
 
@@ -1195,9 +1191,7 @@ def render_theater():
         "Concertos": "concertos",
     }
 
-    col_filtro, _ = st.columns([2, 3])
-    with col_filtro:
-        filtro = st.selectbox("Filtrar por categoria", list(cat_map.keys()), label_visibility="collapsed")
+    filtro = st.radio("Filtrar por categoria", list(cat_map.keys()), horizontal=True, label_visibility="collapsed")
 
     with st.spinner("Carregando programação..."):
         eventos = fetch_em_cartaz()
