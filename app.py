@@ -1138,16 +1138,38 @@ def render_movies():
 
 
 def fetch_em_cartaz():
+    import urllib.request, json
     url = "https://theatromunicipal.org.br/wp-json/wp/v2/eventos?_embed&per_page=50"
-    headers = {
+    req = urllib.request.Request(url, headers={
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-        "Accept": "application/json",
-    }
+        "Accept": "*/*",
+    })
     try:
-        resp = requests.get(url, headers=headers, timeout=15)
-        return resp
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            eventos = json.loads(resp.read())
+        resultados = []
+        for e in eventos:
+            cats = [c for c in e.get("class_list", []) if c.startswith("categorias-eventos-")]
+            img_url = ""
+            if "_embedded" in e and "wp:featuredmedia" in e["_embedded"]:
+                media = e["_embedded"]["wp:featuredmedia"][0]
+                sizes = media.get("media_details", {}).get("sizes", {})
+                img_url = sizes.get("medium", sizes.get("full", {})).get("source_url", "")
+            resultados.append({
+                "titulo": e["title"]["rendered"],
+                "data": e["date"][:10],
+                "link": e["link"],
+                "categorias": [c.replace("categorias-eventos-", "").replace("-", " ") for c in cats],
+                "imagem": img_url,
+            })
+        return ("ok", resultados)
+    except urllib.error.HTTPError as e:
+        return ("http", f"{e.code}")
+    except urllib.error.URLError as e:
+        code = getattr(e, 'code', None) or getattr(e.reason, 'errno', '') or str(e.reason)
+        return ("url", f"{code}")
     except Exception as e:
-        return None
+        return ("erro", f"{type(e).__name__}: {e}")
 
 def render_theater():
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
@@ -1174,52 +1196,59 @@ def render_theater():
     filtro = st.radio("Filtrar por categoria", list(cat_map.keys()), horizontal=True, label_visibility="collapsed")
 
     with st.spinner("Carregando programação..."):
-        resp = fetch_em_cartaz()
+        status, dados = fetch_em_cartaz()
 
-    if resp is None:
-        st.error("Erro de conexão com o Theatro Municipal.")
+    if status == "ok":
+        eventos = dados
+    else:
+        if status == "http":
+            st.error(f"API retornou status {dados}")
+        elif status == "url":
+            st.error(f"Erro de conexão: {dados}")
+        elif status == "erro":
+            st.error(dados)
+        else:
+            st.error(f"Erro desconhecido: {status} / {dados}")
         st.markdown("""
         <div class="card text-center" style="padding:30px;">
             <p style="color:#C9A84C;">Não foi possível carregar a programação no momento.</p>
         </div>
         """, unsafe_allow_html=True)
-    elif resp.status_code != 200:
-        st.error(f"API retornou status {resp.status_code}")
-    else:
-        eventos = resp.json()
-        slug = cat_map[filtro]
-        eventos_filtrados = [e for e in eventos if slug is None or slug in e["categorias"]]
+        return
 
-        if not eventos_filtrados:
-            st.markdown("""
-            <div class="card text-center" style="padding:40px;">
-                <p style="color:#C9A84C;">Nenhum evento encontrado nesta categoria.</p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            for i in range(0, len(eventos_filtrados), 3):
-                cols = st.columns(3)
-                for j in range(3):
-                    if i + j < len(eventos_filtrados):
-                        ev = eventos_filtrados[i + j]
-                        with cols[j]:
-                            img_html = (
-                                f'<img src="{ev["imagem"]}" style="width:100%;height:150px;object-fit:cover;display:block;">'
-                                if ev["imagem"]
-                                else '<div style="width:100%;height:150px;background:linear-gradient(135deg,#1a1510,#0d0a08);display:flex;align-items:center;justify-content:center;color:#C9A84C33;font-size:36px;">✦</div>'
-                            )
-                            cat_tag = ev["categorias"][0] if ev["categorias"] else ""
-                            st.markdown(f"""
-                            <div class="card" style="margin-bottom:16px;overflow:hidden;padding:0;">
-                                {img_html}
-                                <div style="padding:12px 16px;">
-                                    <span class="tag">{cat_tag}</span>
-                                    <p style="margin:8px 0 4px;font-weight:600;font-size:14px;color:#C9A84C;line-height:1.3;">{ev['titulo']}</p>
-                                    <p style="font-size:12px;color:#C9A84C;margin:0 0 6px;">{ev['data']}</p>
-                                    <a href="{ev['link']}" target="_blank" style="color:#C9A84C;font-size:13px;">Ver detalhes →</a>
-                                </div>
+    slug = cat_map[filtro]
+    eventos_filtrados = [e for e in eventos if slug is None or slug in e["categorias"]]
+
+    if not eventos_filtrados:
+        st.markdown("""
+        <div class="card text-center" style="padding:40px;">
+            <p style="color:#C9A84C;">Nenhum evento encontrado nesta categoria.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        for i in range(0, len(eventos_filtrados), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                if i + j < len(eventos_filtrados):
+                    ev = eventos_filtrados[i + j]
+                    with cols[j]:
+                        img_html = (
+                            f'<img src="{ev["imagem"]}" style="width:100%;height:150px;object-fit:cover;display:block;">'
+                            if ev["imagem"]
+                            else '<div style="width:100%;height:150px;background:linear-gradient(135deg,#1a1510,#0d0a08);display:flex;align-items:center;justify-content:center;color:#C9A84C33;font-size:36px;">✦</div>'
+                        )
+                        cat_tag = ev["categorias"][0] if ev["categorias"] else ""
+                        st.markdown(f"""
+                        <div class="card" style="margin-bottom:16px;overflow:hidden;padding:0;">
+                            {img_html}
+                            <div style="padding:12px 16px;">
+                                <span class="tag">{cat_tag}</span>
+                                <p style="margin:8px 0 4px;font-weight:600;font-size:14px;color:#C9A84C;line-height:1.3;">{ev['titulo']}</p>
+                                <p style="font-size:12px;color:#C9A84C;margin:0 0 6px;">{ev['data']}</p>
+                                <a href="{ev['link']}" target="_blank" style="color:#C9A84C;font-size:13px;">Ver detalhes →</a>
                             </div>
-                            """, unsafe_allow_html=True)
+                        </div>
+                        """, unsafe_allow_html=True)
 
 
     st.divider()
