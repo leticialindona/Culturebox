@@ -8,7 +8,7 @@ from supabase import create_client
 st.set_page_config(page_title="AfterShow", layout="wide", initial_sidebar_state="collapsed")
 
 
-for key in ["user", "pagina", "splash", "injetado", "wiki_result", "supabase_client", "amigo_id", "conversa_amigo"]:
+for key in ["user", "pagina", "splash", "injetado", "wiki_result", "supabase_client", "amigo_id"]:
     if key not in st.session_state:
         if key == "user":
             st.session_state.user = None
@@ -24,8 +24,6 @@ for key in ["user", "pagina", "splash", "injetado", "wiki_result", "supabase_cli
             st.session_state.supabase_client = None
         elif key == "amigo_id":
             st.session_state.amigo_id = None
-        elif key == "conversa_amigo":
-            st.session_state.conversa_amigo = None
 
 
 SUPABASE_URL = st.secrets.get("supabase_url", "https://ntxqfaqskorbxbaswdsl.supabase.co")
@@ -838,15 +836,12 @@ def render_top_nav():
         ("Favoritos", "Favoritos"),
         ("Pastas", "Pastas"),
         ("Amigos", "Amigos"),
-        ("Chat", "Conversas"),
     ]
 
     cols = st.columns(len(pages), gap="small")
     for i, (display, page) in enumerate(pages):
         with cols[i]:
             if st.button(display, key=f"tnav_{page}", use_container_width=False):
-                st.session_state.amigo_id = None
-                st.session_state.conversa_amigo = None
                 st.session_state.pagina = page
                 st.rerun()
 
@@ -1897,195 +1892,7 @@ def render_friend_profile():
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-def render_conversas():
-    st.markdown('<div class="fade-in">', unsafe_allow_html=True)
 
-    amigo_chat = st.session_state.get("conversa_amigo")
-
-    if amigo_chat:
-        # ── CHAT ──
-        try:
-            perfil = supabase.table("profiles").select("*").eq("id", amigo_chat).execute()
-            if not perfil.data:
-                st.error("Amigo nao encontrado.")
-                st.session_state.conversa_amigo = None
-                st.rerun()
-                return
-            amigo = perfil.data[0]
-        except Exception as e:
-            st.error(e)
-            return
-
-        col_voltar, col_nome = st.columns([0.2, 0.8])
-        with col_voltar:
-            if st.button("← Voltar", use_container_width=True):
-                st.session_state.conversa_amigo = None
-                st.rerun()
-        with col_nome:
-            st.markdown(f'<h3 style="margin:0;">@{amigo["username"]}</h3>', unsafe_allow_html=True)
-
-        st.divider()
-
-        try:
-            msgs = supabase.table("mensagens").select("*").or_(
-                f"and(remetente_id.eq.{st.session_state.user.id},destinatario_id.eq.{amigo_chat}),"
-                f"and(remetente_id.eq.{amigo_chat},destinatario_id.eq.{st.session_state.user.id})"
-            ).order("data_envio").execute()
-
-            if msgs.data:
-                for m in msgs.data:
-                    sou_eu = m["remetente_id"] == st.session_state.user.id
-                    lado = "right" if sou_eu else "left"
-                    cor = "#C9A84C" if sou_eu else "#C9A84C15"
-                    texto_cor = "#0d0a08" if sou_eu else "#C9A84C"
-                    is_critica = m["conteudo"].startswith("CRITICA:")
-                    critica_style = "border-left:3px solid #C9A84C;" if is_critica else ""
-                    st.markdown(
-                        f'<div style="display:flex;justify-content:{lado};margin-bottom:8px;">'
-                        f'<div style="background:{cor};color:{texto_cor};padding:10px 16px;'
-                        f'border-radius:16px;max-width:75%;font-size:14px;line-height:1.4;{critica_style}'
-                        f'white-space:pre-wrap;">{m["conteudo"]}</div></div>',
-                        unsafe_allow_html=True,
-                    )
-            else:
-                st.markdown(
-                    '<p style="color:#C9A84C;text-align:center;padding:20px 0;">'
-                    'Nenhuma mensagem ainda. Envie algo ou compartilhe uma critica!</p>',
-                    unsafe_allow_html=True,
-                )
-        except Exception as e:
-            st.error(e)
-
-    
-        st.divider()
-        with st.form("envio_msg", clear_on_submit=True):
-            texto = st.text_input("", placeholder="Digite sua mensagem...", label_visibility="collapsed")
-            if st.form_submit_button("Enviar", use_container_width=True):
-                if texto.strip():
-                    try:
-                        supabase.table("mensagens").insert({
-                            "remetente_id": st.session_state.user.id,
-                            "destinatario_id": amigo_chat,
-                            "conteudo": texto.strip(),
-                        }).execute()
-                        st.rerun()
-                    except Exception as e:
-                        st.error(e)
-
-        st.divider()
-        st.markdown("### Compartilhar Critica")
-        try:
-            minhas_criticas = supabase.table("criticas").select("*").eq(
-                "usuario_id", st.session_state.user.id
-            ).order("id", desc=True).execute()
-
-            if minhas_criticas.data:
-                opcoes = {
-                    f'{c["filme"]} — {c["nota"]}/10': c
-                    for c in minhas_criticas.data
-                }
-                escolha = st.selectbox(
-                    "Selecione uma critica", list(opcoes.keys()),
-                    label_visibility="collapsed",
-                )
-                if st.button("Enviar Critica para @" + amigo["username"], use_container_width=True):
-                    c = opcoes[escolha]
-                    estrelas = "★" * (c["nota"] // 2) + "☆" * (5 - c["nota"] // 2)
-                    texto_critica = (
-                        f"CRITICA: {c['filme']}\n"
-                        f"Nota: {c['nota']}/10 {estrelas}\n"
-                        f"{c.get('comentario', '')}"
-                    ).strip()
-                    try:
-                        supabase.table("mensagens").insert({
-                            "remetente_id": st.session_state.user.id,
-                            "destinatario_id": amigo_chat,
-                            "conteudo": texto_critica,
-                        }).execute()
-                        st.success("Critica enviada!")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(e)
-            else:
-                st.markdown(
-                    '<p style="color:#C9A84C;">Voce ainda nao fez nenhuma critica. '
-                    'Avalie filmes, teatro ou musicais primeiro!</p>',
-                    unsafe_allow_html=True,
-                )
-        except Exception as e:
-            st.error(e)
-
-    else:
-        
-        st.header("Conversas")
-        try:
-            amizades = supabase.table("amigos").select("*").eq(
-                "usuario_id", st.session_state.user.id
-            ).execute()
-            amigos_ids = {a["amigo_id"] for a in amizades.data}
-
-            if amigos_ids:
-                for aid in sorted(amigos_ids):
-                    try:
-                        p = supabase.table("profiles").select("id,username,avatar_url,bio").eq("id", aid).execute()
-                        if not p.data:
-                            continue
-                        amigo = p.data[0]
-
-                        ultima = supabase.table("mensagens").select("conteudo,data_envio").or_(
-                            f"and(remetente_id.eq.{st.session_state.user.id},destinatario_id.eq.{aid}),"
-                            f"and(remetente_id.eq.{aid},destinatario_id.eq.{st.session_state.user.id})"
-                        ).order("data_envio", desc=True).limit(1).execute()
-
-                        preview = "Iniciar conversa..."
-                        tem_msg = False
-                        if ultima.data:
-                            preview = ultima.data[0]["conteudo"][:60]
-                            if len(ultima.data[0]["conteudo"]) > 60:
-                                preview += "..."
-                            tem_msg = True
-
-                        inicial = amigo["username"][0].upper()
-                        st.markdown(f"""
-                        <div style="display:flex;align-items:center;gap:12px;
-                            background:#1a1510;border:1px solid #C9A84C33;
-                            border-radius:12px;padding:12px 16px;margin-bottom:8px;">
-                            <div style="width:40px;height:40px;border-radius:50%;
-                                background:linear-gradient(135deg,#C9A84C,#a8872e);
-                                display:flex;align-items:center;justify-content:center;
-                                font-weight:700;color:#0d0a08;font-size:18px;flex-shrink:0;">
-                                {inicial}
-                            </div>
-                            <div style="flex:1;min-width:0;">
-                                <div style="font-size:15px;font-weight:600;color:#C9A84C;">
-                                    @{amigo['username']}
-                                </div>
-                                <div style="font-size:13px;color:#C9A84C;overflow:hidden;
-                                    text-overflow:ellipsis;white-space:nowrap;">
-                                    {preview}
-                                </div>
-                            </div>
-                            {f'<span style="font-size:10px;color:#C9A84C55;">msg</span>' if tem_msg else ''}
-                        </div>
-                        """, unsafe_allow_html=True)
-                        if st.button("Conversar", key=f"chat_{aid}", use_container_width=True):
-                            st.session_state.conversa_amigo = aid
-                            st.rerun()
-                    except:
-                        continue
-            else:
-                st.markdown("""
-                <div class="card text-center" style="padding:60px 20px;">
-                    <p style="color:#C9A84C;font-size:16px;">
-                        Nenhum amigo ainda.<br>Adicione amigos para conversar!
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-
-        except Exception as e:
-            st.error(f"Erro ao carregar conversas: {e}")
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
 if st.session_state.splash:
     render_splash()
@@ -2106,7 +1913,6 @@ else:
             "Pastas": render_folders,
             "Amigos": render_friends,
             "Perfil do Amigo": render_friend_profile,
-            "Conversas": render_conversas,
         }
 
         page = st.session_state.pagina
